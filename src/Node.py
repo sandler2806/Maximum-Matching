@@ -5,6 +5,9 @@ class Node:
         self.geolocation = geolocation
         self.tag = 0
         self.edges = []
+        self.parent=None
+        self.match=None
+        self.visited=False
 
     # add edge
     def add_edge(self, dest: int):
