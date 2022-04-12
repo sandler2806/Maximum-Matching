@@ -21,6 +21,14 @@ def alternatePath(path: list[Node]):
         path[i + 1].match = node
 
 
+class Blossom(Node):
+
+    def __init__(self):
+        Node.__init__(self)
+        self.nodes = []
+        self.edges = []
+
+
 class MaximumMatching:
 
     def __init__(self, graph: Graph):
@@ -30,7 +38,7 @@ class MaximumMatching:
         self.exposed = []
         self.blossoms = []
 
-    def constract_blossom(self, blossom_nodes: list)-> Node:
+    def constract_blossom(self, blossom_nodes: list) -> Node:
         self.cycle = copy.deepcopy(blossom_nodes)
         blossom: Node = copy.deepcopy(blossom_nodes[0])
         blossom.clear_node()
@@ -54,7 +62,6 @@ class MaximumMatching:
         for node in self.cycle:
             for edge in node.edges:
                 self.graph.add_edge(node.key, edge)
-
 
     def distract_blossom(self, blossom_node: Node):
         # self.graph = copy.deepcopy(self.orgGraph)
@@ -98,29 +105,34 @@ class MaximumMatching:
                     break
 
     def findAugmentingPath(self, src: Node) -> list:
-        queue: Queue[Node] = Queue()
-        queue.put(src)
-        while not queue.empty():
-            currNode = queue.get()
+        queue: list[Node] = [src]
+        while len(queue) != 0:
+            currNode = queue.pop(0)
             currNode.visited = True
             if currNode.parent is None or currNode.parent.match == currNode:
                 for neiId in currNode.edges:
                     nei = self.graph.nodes.get(neiId)
 
-                    if currNode.parent == nei or nei.visited is True:
+                    if currNode.parent == nei:
                         continue
+                    if nei.visited is True:
+                        cycle = find_cycles(nei, currNode)
+                        if len(cycle) % 2 == 1:
+                            blossom = self.constract_blossom(cycle)
+                            for n in cycle:
+                                queue.remove(n)
                     nei.parent = currNode
 
                     if nei in self.exposed:
                         return createPath(nei)
-                    queue.put(nei)
+                    queue.append(nei)
             else:
                 nei = currNode.match
                 nei.parent = currNode
                 if nei.visited is False:
                     if nei in self.exposed:
                         return createPath(nei)
-                queue.put(nei)
+                queue.append(nei)
 
     def findExposed(self):
         for node in self.graph.nodes.values():
