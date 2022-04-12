@@ -106,6 +106,8 @@ class MaximumMatching:
                 if len(path) > 0:
                     augmentingPathFound = True
                     alternatePath(path)
+                    for blossom in self.blossoms:
+                        self.distract_blossom(blossom)
                     break
 
     def findAugmentingPath(self, src: Node) -> list:
@@ -116,9 +118,9 @@ class MaximumMatching:
             if currNode.parent is None or currNode.parent.match == currNode:
                 for neiId in currNode.edges:
                     nei = self.graph.nodes.get(neiId)
-
                     if currNode.parent == nei:
                         continue
+
                     if nei.visited is True:
                         cycle = self.find_cycles(nei, currNode)
                         if len(cycle) % 2 == 1:
@@ -138,6 +140,14 @@ class MaximumMatching:
                 if nei.visited is False:
                     if nei in self.exposed:
                         return createPath(nei)
+                else:
+                    cycle = self.find_cycles(nei, currNode)
+                    if len(cycle) % 2 == 1:
+                        blossom = self.constract_blossom(cycle)
+                        for n in cycle:
+                            queue.remove(n)
+                        queue.append(blossom)
+                        break
                 queue.append(nei)
 
     def findExposed(self):
@@ -168,5 +178,9 @@ class MaximumMatching:
             index_ans2 -= 1
         return ans1[:index_ans1 + 1] + ans2[index_ans2 + 1:-1]
 
-    def insertBlossom(self,currNode,nei):
-        pass
+
+if __name__ == '__main__':
+    graph = Graph("../data/T0.json")
+    mm=MaximumMatching(graph)
+    mm.findMatching()
+    print()
