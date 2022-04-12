@@ -1,6 +1,6 @@
 class Node:
 
-    def __init__(self, key: int, geolocation: tuple = (0, 0, 0)):
+    def __init__(self, key: int = None, geolocation: tuple = (0, 0, 0)):
         self.key = key
         self.geolocation = geolocation
         self.tag = 0

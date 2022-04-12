@@ -144,3 +144,14 @@ class MaximumMatching:
             node.parent = None
             node.visited = None
             # self.findExposed()
+
+
+    def find_ancestor(self, node)->list:
+        ancestor_lst = [node]
+        while node.parent is not None:
+            node = node.parent
+            ancestor_lst.append(node)
+        return ancestor_lst
+
+    def find_cycles(self, node, node_curr):
+
