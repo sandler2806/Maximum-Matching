@@ -116,11 +116,13 @@ class MaximumMatching:
                     if currNode.parent == nei:
                         continue
                     if nei.visited is True:
-                        cycle = find_cycles(nei, currNode)
+                        cycle = self.find_cycles(nei, currNode)
                         if len(cycle) % 2 == 1:
                             blossom = self.constract_blossom(cycle)
                             for n in cycle:
                                 queue.remove(n)
+                            queue.append(blossom)
+                            break
                     nei.parent = currNode
 
                     if nei in self.exposed:
@@ -145,13 +147,14 @@ class MaximumMatching:
             node.visited = None
             # self.findExposed()
 
-
-    def find_ancestor(self, node)->list:
+    def find_ancestor(self, node) -> list:
         ancestor_lst = [node]
         while node.parent is not None:
             node = node.parent
             ancestor_lst.append(node)
         return ancestor_lst
 
-    def find_cycles(self, node, node_curr):
+    def find_cycles(self, node, node_curr) -> list:
+        pass
 
+    def insertBlossom(self,currNode,nei):
