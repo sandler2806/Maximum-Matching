@@ -7,5 +7,5 @@ class Node:
         self.edges = []
 
     # add edge
-    def add_edge(self,dest: int):
+    def add_edge(self, dest: int):
         self.edges.append(dest)
