@@ -13,12 +13,12 @@ class MaximumMatching:
         self.cycle: List[Node] = []
         self.exposed = []
 
-
-    def constract_blossom(self, blossom_nodes: list):
-        self.cycle = blossom_nodes
+    def constract_blossom(self, blossom_nodes: list)-> Node:
+        self.cycle = copy.deepcopy(blossom_nodes)
         blossom: Node = copy.deepcopy(blossom_nodes[0])
         blossom.clear_node()
-        self.graph.nodes[blossom.key] = blossom
+        self.graph.add_node(-1, blossom.geolocation)
+        blossom = self.graph.nodes.get(-1)
         for node in blossom_nodes:
             for edge in node.edges:
                 temp_node: Node = self.orgGraph.nodes.get(edge)
@@ -29,20 +29,42 @@ class MaximumMatching:
                         blossom.match = temp_node
         for node in blossom_nodes:
             self.graph.remove_node(node.key)
+        return blossom
+
+    def build_edges(self):
+        for node in self.cycle:
+            self.graph.add_node(node.key, node.geolocation)
+        for node in self.cycle:
+            for edge in node.edges:
+                self.graph.add_edge(node.key, edge)
+
     def distract_blossom(self, blossom_node: Node):
-        self.graph = copy.deepcopy(self.orgGraph)
+        # self.graph = copy.deepcopy(self.orgGraph)
+        self.build_edges()
+        real_node: Node
+        real_node = None
         node_neigh: Node = self.graph.nodes.get(blossom_node.match.key)
         for neigh in node_neigh.edges:
-            if neigh in self.cycle:
-
-
-
-
-
-
-
-
-
+            node = self.graph.nodes.get(neigh)
+            if node in self.cycle:
+                node_neigh.match = node
+                node.match = node_neigh
+                real_node = node
+                break
+        if real_node is None:
+            return
+        node_popped = self.cycle.pop(0)
+        while node_popped != real_node:
+            self.cycle.append(node_popped)
+            node_popped = self.cycle.pop(0)
+        self.cycle.insert(0, node_popped)
+        for node_index in range(1, len(self.cycle) - 1):
+            if (node_index + 1) % 2 == 0:
+                node1 = self.graph.nodes.get(self.cycle[node_index].key)
+                node2 = self.graph.nodes.get(self.cycle[node_index + 1].key)
+                node1.match = node2
+                node2.match = node1
+        self.graph.remove_node(blossom_node.key)
 
     def findMatching(self):
         self.findExposed()
