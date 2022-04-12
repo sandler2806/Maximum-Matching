@@ -30,7 +30,7 @@ class MaximumMatching:
         self.exposed = []
         self.blossoms = []
 
-    def constract_blossom(self, blossom_nodes: list)-> Node:
+    def constract_blossom(self, blossom_nodes: list) -> Node:
         self.cycle = copy.deepcopy(blossom_nodes)
         blossom: Node = copy.deepcopy(blossom_nodes[0])
         blossom.clear_node()
@@ -54,7 +54,6 @@ class MaximumMatching:
         for node in self.cycle:
             for edge in node.edges:
                 self.graph.add_edge(node.key, edge)
-
 
     def distract_blossom(self, blossom_node: Node):
         # self.graph = copy.deepcopy(self.orgGraph)
@@ -133,13 +132,19 @@ class MaximumMatching:
             node.visited = None
             # self.findExposed()
 
-
-    def find_ancestor(self, node)->list:
+    def find_ancestor(self, node) -> list:
         ancestor_lst = [node]
         while node.parent is not None:
             node = node.parent
             ancestor_lst.append(node)
         return ancestor_lst
 
-    def find_cycles(self, node, node_curr):
-
+    def find_cycles(self, node, node_curr) -> list:
+        ans1 = self.find_ancestor(node)
+        ans2 = self.find_ancestor(node_curr)
+        index_ans1 = len(ans1) - 1
+        index_ans2 = len(ans2) - 1
+        while ans1[index_ans1] != ans2[index_ans2]:
+            index_ans1 -= 1
+            index_ans2 -= 1
+        return ans1[:index_ans1 + 1] + ans2[index_ans2 + 1:-1]
