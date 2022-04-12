@@ -8,7 +8,7 @@ import json
 class Graph:
 
     def __init__(self, jsonfile: str = None):
-        self.nodes = {}
+        self.nodes: dict[int, Node] = {}
         self._numOfEdges = 0
         self._mc = 0
         if jsonfile is not None:
@@ -203,6 +203,7 @@ class Graph:
     calculate the minimum and maximum values of x and y between the all the nodes in order to use them in the set
     location function and in the graph draw
     """
+
     def caclulate_minmax(self) -> (tuple, tuple, tuple):
         # set the min and the max values
         minx = sys.maxsize
