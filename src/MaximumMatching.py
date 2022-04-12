@@ -155,6 +155,14 @@ class MaximumMatching:
         return ancestor_lst
 
     def find_cycles(self, node, node_curr) -> list:
-        pass
+        ans1 = self.find_ancestor(node)
+        ans2 = self.find_ancestor(node_curr)
+        index_ans1 = len(ans1) - 1
+        index_ans2 = len(ans2) - 1
+        while ans1[index_ans1] != ans2[index_ans2]:
+            index_ans1 -= 1
+            index_ans2 -= 1
+        return ans1[:index_ans1 + 1] + ans2[index_ans2 + 1:-1]
 
     def insertBlossom(self,currNode,nei):
+        pass
