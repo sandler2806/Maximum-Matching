@@ -1,12 +1,11 @@
 import random
 import sys
 
-from GraphInterface import GraphInterface
 from Node import Node
 import json
 
 
-class DiGraph(GraphInterface):
+class Graph:
 
     def __init__(self, jsonfile: str = None):
         self.nodes = {}
@@ -32,9 +31,9 @@ class DiGraph(GraphInterface):
             # iterate over the edges and add them
             for edgeIter in edges_json:
                 src = edgeIter['src']
-                weight = edgeIter['w']
                 dest = edgeIter['dest']
-                self.add_edge(src, dest, weight)
+                if dest not in self.nodes[src].edges:
+                    self.add_edge(src, dest)
             self.set_location()
         # if the file is None then give randomize locations
         else:
@@ -63,21 +62,15 @@ class DiGraph(GraphInterface):
              (node_id, node_data)
             """
 
-    def all_in_edges_of_node(self, id1: int) -> dict:
+    def all_edges_of_node(self, id1: int) -> dict:
         # if there is no node with the given id in the graph
         if id1 not in self.nodes:
-            return {}
-        return self.nodes[id1].inEdges
+            return []
+        return self.nodes[id1].edges
 
     """return a dictionary of all the nodes connected to (into) node_id ,
                     each node is represented using a pair (other_node_id, weight)
                      """
-
-    def all_out_edges_of_node(self, id1: int) -> dict:
-        # if there is no node with the given id in the graph
-        if id1 not in self.nodes:
-            return {}
-        return self.nodes[id1].outEdges
 
     """
     return a dictionary of all the nodes connected from node_id , each node is represented using a pair
@@ -93,7 +86,7 @@ class DiGraph(GraphInterface):
     @return: The current version of this graph.
     """
 
-    def add_edge(self, id1: int, id2: int, weight: float) -> bool:
+    def add_edge(self, id1: int, id2: int) -> bool:
         node_src = self.nodes.get(id1)
         node_dst = self.nodes.get(id2)
         # if there is no node with one of the given id's or the edge is missing then return false
@@ -101,8 +94,8 @@ class DiGraph(GraphInterface):
             return False
         else:
             # add the edge to the nodes
-            node_src.outEdges[id2] = weight
-            node_dst.inEdges[id1] = weight
+            node_src.edges.append(id2)
+            node_dst.edges.append(id1)
             self._mc += 1
             self._numOfEdges += 1
             return True
@@ -142,12 +135,9 @@ class DiGraph(GraphInterface):
             return False
         else:
             # if the node in the graph run over all of the edges that connected to the node and remove them
-            out_edges = self.nodes[node_id].outEdges.copy()
-            in_edges = self.nodes[node_id].inEdges.copy()
-            for node_key in out_edges.keys():
+            edges = self.nodes[node_id].edges.copy()
+            for node_key in edges:
                 self.remove_edge(node_id, node_key)
-            for node_key in in_edges.keys():
-                self.remove_edge(node_key, node_id)
             # then remove the node
             self.nodes.pop(node_id)
             self._mc += 1
@@ -170,9 +160,9 @@ class DiGraph(GraphInterface):
             return False
         else:
             # if the nodes are in the graph then remove the edge between the nodes
-            if node_id2 in node.outEdges:
-                node.outEdges.pop(node_id2)
-                node2.inEdges.pop(node_id1)
+            if node_id2 in node.edges:
+                node.edges.remove(node_id2)
+                node2.edges.remove(node_id1)
                 self._mc += 1
                 self._numOfEdges -= 1
                 return True

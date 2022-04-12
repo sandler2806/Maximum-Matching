@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from DiGraph import DiGraph
+from Graph import DiGraph
 
 
 class TestDiGraph(TestCase):

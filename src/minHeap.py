@@ -1,6 +1,6 @@
 import sys
 
-from src.DiGraph import DiGraph
+from src.Graph import DiGraph
 from src.Node import Node
 
 """

@@ -1,7 +1,7 @@
 import copy
 import sys
 
-from src.DiGraph import DiGraph
+from src.Graph import DiGraph
 from src.GraphAlgo import GraphAlgo
 from src.Node import Node
 from src.minHeap import MinHeap
