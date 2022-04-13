@@ -96,11 +96,13 @@ class MaximumMatching:
         self.graph.remove_node(blossom_node.key)
 
     def findMatching(self):
-        self.findExposed()
         augmentingPathFound = True
         while augmentingPathFound:
+            self.findExposed()
             augmentingPathFound = False
             for node in self.exposed:
+                if node.key==13:
+                    print()
                 self.resetNodes()
                 path = self.findAugmentingPath(node)
                 if len(path) > 0:
@@ -109,14 +111,19 @@ class MaximumMatching:
                     for blossom in self.blossoms:
                         self.distract_blossom(blossom)
                     break
+        for blossom in self.blossoms:
+            self.distract_blossom(blossom)
 
     def findAugmentingPath(self, src: Node) -> list:
         queue: list[Node] = [src]
         while len(queue) != 0:
             currNode = queue.pop(0)
+            if currNode.key == 14:
+                print()
             currNode.visited = True
             if currNode.parent is None or currNode.parent.match == currNode:
                 for neiId in currNode.edges:
+
                     nei = self.graph.nodes.get(neiId)
                     if currNode.parent == nei:
                         continue
@@ -141,16 +148,20 @@ class MaximumMatching:
                     if nei in self.exposed:
                         return createPath(nei)
                 else:
+
                     cycle = self.find_cycles(nei, currNode)
                     if len(cycle) % 2 == 1:
                         blossom = self.constract_blossom(cycle)
                         for n in cycle:
-                            queue.remove(n)
+                            if n in queue:
+                                queue.remove(n)
                         queue.append(blossom)
                         break
                 queue.append(nei)
+        return []
 
     def findExposed(self):
+        self.exposed.clear()
         for node in self.graph.nodes.values():
             if node.match is None:
                 self.exposed.append(node)
@@ -158,7 +169,7 @@ class MaximumMatching:
     def resetNodes(self):
         for node in self.graph.nodes.values():
             node.parent = None
-            node.visited = None
+            node.visited = False
             # self.findExposed()
 
     def find_ancestor(self, node) -> list:
@@ -180,7 +191,7 @@ class MaximumMatching:
 
 
 if __name__ == '__main__':
-    graph = Graph("../data/T0.json")
+    graph = Graph("../data/A1.json")
     mm=MaximumMatching(graph)
     mm.findMatching()
     print()
