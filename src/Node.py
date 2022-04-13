@@ -17,6 +17,9 @@ class Node:
         self.match: Node
         self.match = None
         self.visited = False
+        self.org_nodes = []
+        self.org_edges = []
+        self.blossom=False
 
     # add edge
     def add_edge(self, dest: int):

@@ -21,12 +21,12 @@ def alternatePath(path: list[Node]):
         path[i + 1].match = node
 
 
-class Blossom(Node):
-
-    def __init__(self):
-        Node.__init__(self)
-        self.org_nodes = []
-        self.org_edges = []
+# class Blossom(Node):
+#
+#     def __init__(self):
+#         Node.__init__(self)
+#         self.org_nodes = []
+#         self.org_edges = []
 
 
 class MaximumMatching:
@@ -38,9 +38,9 @@ class MaximumMatching:
         self.blossoms = []
 
     def constract_blossom(self, blossom_nodes: list) -> Node:
-        super_node = Blossom()
-        super_node.geolocation = blossom_nodes[0].geolocation
-        self.graph.add_node(super_node.key, super_node.geolocation)
+        super_node = Node()
+        self.graph.add_node(super_node.key, blossom_nodes[0].geolocation)
+        super_node = self.graph.nodes.get(super_node.key)
         for node in blossom_nodes:
             super_node.org_nodes.append(node)
             for edge in node.edges:
@@ -56,30 +56,37 @@ class MaximumMatching:
             node_cycle = node_cycle.parent
         super_node.parent = node_cycle.parent
         super_node.match = node_cycle.match
+        for node1, node2 in super_node.org_edges:
+            self.graph.remove_edge(node1.key, node2.key)
         for node in blossom_nodes:
             self.graph.remove_node(node.key)
         self.blossoms.append(super_node)
         return super_node
 
-    def build_edges(self, blossom: Blossom):
+    def build_edges(self, blossom: Node):
         for node in blossom.org_nodes:
             self.graph.add_node(node.key, node.geolocation)
         for node1, node2 in blossom.org_edges:
             self.graph.add_edge(node1.key, node2.key)
+        for node in blossom.org_nodes:
+            for edge in node.edges:
+                self.graph.add_edge(node.key, edge)
 
-    def distract_blossom(self, blossom_node: Blossom):
+    def distract_blossom(self, blossom_node: Node):
         # self.graph = copy.deepcopy(self.orgGraph)
+        self.graph.graph_plot()
         self.build_edges(blossom_node)
         real_node: Node
         real_node = None
         node_neigh: Node = self.graph.nodes.get(blossom_node.match.key)
         for neigh in node_neigh.edges:
             node = self.graph.nodes.get(neigh)
-            if node in blossom_node.org_nodes:
-                node_neigh.match = node
-                node.match = node_neigh
-                real_node = node
-                break
+            for c in blossom_node.org_nodes:
+                if neigh == c.key:
+                    node_neigh.match = node
+                    node.match = node_neigh
+                    real_node = node
+                    break
         if real_node is None:
             return
         node_popped = blossom_node.org_nodes.pop(0)
@@ -101,8 +108,8 @@ class MaximumMatching:
             self.findExposed()
             augmentingPathFound = False
             for node in self.exposed:
-                if node.key == 13:
-                    print()
+                if node.key == 15:
+                    self.graph.graph_plot()
                 self.resetNodes()
                 path = self.findAugmentingPath(node)
                 if len(path) > 0:
@@ -118,8 +125,6 @@ class MaximumMatching:
         queue: list[Node] = [src]
         while len(queue) != 0:
             currNode = queue.pop(0)
-            if currNode.key == 14:
-                print()
             currNode.visited = True
             if currNode.parent is None or currNode.parent.match == currNode:
                 for neiId in currNode.edges:
@@ -192,7 +197,7 @@ class MaximumMatching:
 
 
 if __name__ == '__main__':
-    graph = Graph("../data/A0.json")
+    graph = Graph("../data/A1.json")
     mm = MaximumMatching(graph)
     mm.findMatching()
     # print()
