@@ -34,16 +34,10 @@ class MaximumMatching:
     def __init__(self, graph: Graph):
         self.orgGraph = graph
         self.graph = graph
-        self.cycle: List[Node] = []
         self.exposed = []
         self.blossoms = []
 
     def constract_blossom(self, blossom_nodes: list) -> Node:
-        # self.cycle = copy.deepcopy(blossom_nodes)
-        # blossom: Node = Node(None, blossom_nodes[0].geolocation)
-        # blossom.clear_node()
-        #
-        # blossom = self.graph.nodes.get(blossom.key)
         super_node = Blossom()
         super_node.geolocation = blossom_nodes[0].geolocation
         self.graph.add_node(super_node.key, super_node.geolocation)
@@ -58,12 +52,13 @@ class MaximumMatching:
                     if temp_node.parent in blossom_nodes:
                         temp_node.parent = super_node
         node_cycle = blossom_nodes[0]
-        while node_cycle in blossom_nodes:
+        while node_cycle.parent in blossom_nodes:
             node_cycle = node_cycle.parent
         super_node.parent = node_cycle.parent
         super_node.match = node_cycle.match
         for node in blossom_nodes:
             self.graph.remove_node(node.key)
+        self.blossoms.append(super_node)
         return super_node
 
     def build_edges(self, blossom: Blossom):
@@ -135,18 +130,18 @@ class MaximumMatching:
 
                     if nei.visited is True:
                         cycle = self.find_cycles(nei, currNode)
-                        if len(cycle) % 2 == 1:
+                        if len(cycle) % 2 == 1 and len(cycle) < graph.v_size():
                             blossom = self.constract_blossom(cycle)
                             for n in cycle:
                                 if n in queue:
                                     queue.remove(n)
                             queue.append(blossom)
                             break
-                    nei.parent = currNode
-
-                    if nei in self.exposed:
-                        return createPath(nei)
-                    queue.append(nei)
+                    else:
+                        nei.parent = currNode
+                        if nei in self.exposed:
+                            return createPath(nei)
+                        queue.append(nei)
             else:
                 nei = currNode.match
                 nei.parent = currNode
@@ -190,15 +185,15 @@ class MaximumMatching:
         ans2 = self.find_ancestor(node_curr)
         index_ans1 = len(ans1) - 1
         index_ans2 = len(ans2) - 1
-        while ans1[index_ans1] != ans2[index_ans2]:
+        while ans1[index_ans1] == ans2[index_ans2]:
             index_ans1 -= 1
             index_ans2 -= 1
-        return ans1[:index_ans1 + 1] + ans2[index_ans2 + 1:-1]
+        return ans1[:index_ans1 + 1] + ans2[index_ans2 + 1::-1]
 
 
 if __name__ == '__main__':
     graph = Graph("../data/A0.json")
-    mm=MaximumMatching(graph)
+    mm = MaximumMatching(graph)
     mm.findMatching()
+    # print()
     mm.graph.graph_plot()
-    print()
