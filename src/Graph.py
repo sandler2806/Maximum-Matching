@@ -1,6 +1,8 @@
 import random
 import sys
 
+import pygame
+
 from Node import Node
 import json
 
@@ -231,3 +233,42 @@ class Graph:
             return (minx, miny, max_x, max_x), (abs_x, abs_y), (scale_lon, scale_lat)
         else:
             return (minx, miny, max_x, max_x), (0, 0), (0, 0)
+
+    def graph_plot(self):
+        pygame.init()
+        scr = pygame.display.set_mode((900, 650))
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            scr.fill((255, 255, 255))
+            self.set_location()
+            scaling = self.caclulate_minmax()
+            min_x = scaling[0][0]
+            min_y = scaling[0][1]
+            lon = scaling[2][0]
+            lat = scaling[2][1]
+            color = (200, 30, 70)
+            font = pygame.font.SysFont('Times ', 12)
+            # iterate over the edges first and draw them
+            for node in self.nodes:
+                for edge in self.all_edges_of_node(node):
+                    x1 = (self.nodes[node].geolocation[0] - min_x) * (lon) + 60
+                    y1 = (self.nodes[node].geolocation[1] - min_y) * (lat) + 60
+                    x2 = (self.nodes[edge].geolocation[0] - min_x) * (lon) + 60
+                    y2 = (self.nodes[edge].geolocation[1] - min_y) * (lat) + 60
+                    if self.nodes.get(node).match == self.nodes.get(edge):
+                        pygame.draw.line(scr, color, (x1, y1), (x2, y2), 2)
+                    else:
+                        pygame.draw.line(scr, (0, 0, 0), (x1, y1), (x2, y2), 2)
+
+            for node in self.nodes:
+                x = (self.nodes[node].geolocation[0] - min_x) * (lon) + 60
+                y = (self.nodes[node].geolocation[1] - min_y) * (lat) + 60
+                pygame.draw.circle(scr, (0, 0, 0), (x, y), 4)
+                txt = font.render(str(node), 1, (0, 150, 255))
+                scr.blit(txt, (x - 8, y - 19))
+
+            pygame.display.flip()
+        pygame.quit()

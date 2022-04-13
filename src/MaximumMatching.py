@@ -133,7 +133,8 @@ class MaximumMatching:
                         if len(cycle) % 2 == 1:
                             blossom = self.constract_blossom(cycle)
                             for n in cycle:
-                                queue.remove(n)
+                                if n in queue:
+                                    queue.remove(n)
                             queue.append(blossom)
                             break
                     nei.parent = currNode
@@ -191,7 +192,8 @@ class MaximumMatching:
 
 
 if __name__ == '__main__':
-    graph = Graph("../data/A1.json")
+    graph = Graph("../data/A0.json")
     mm=MaximumMatching(graph)
     mm.findMatching()
+    mm.graph.graph_plot()
     print()
