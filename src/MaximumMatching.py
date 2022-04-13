@@ -38,7 +38,7 @@ class MaximumMatching:
         self.blossoms = []
 
     def constract_blossom(self, blossom_nodes: list) -> Node:
-        self.graph.graph_plot()
+        # self.graph.graph_plot()
         super_node = Node()
         self.graph.add_node(super_node.key, blossom_nodes[0].geolocation)
         super_node = self.graph.nodes.get(super_node.key)
@@ -68,31 +68,37 @@ class MaximumMatching:
         for node in blossom.org_nodes:
             self.graph.add_node(node.key, node.geolocation)
         for node1, node2 in blossom.org_edges:
+            if node2.key not in self.graph.nodes:
+                print()
             self.graph.add_edge(node1.key, node2.key)
         for node in blossom.org_nodes:
             for edge in node.edges:
                 self.graph.add_edge(node.key, edge)
 
     def distract_blossom(self, blossom_node: Node):
-        self.graph.graph_plot()
+        # self.graph.graph_plot()
         self.build_edges(blossom_node)
-        real_node: Node
-        real_node = None
-        node_neigh: Node = self.graph.nodes.get(blossom_node.match.key)
-        for neigh in node_neigh.edges:
-            node = self.graph.nodes.get(neigh)
-            for c in blossom_node.org_nodes:
-                if neigh == c.key:
-                    node_neigh.match = node
-                    node.match = node_neigh
-                    real_node = node
-                    break
-        if real_node is None:
-            return
-        node_popped = blossom_node.org_nodes.pop(0)
-        while node_popped.key != real_node.key:
-            blossom_node.org_nodes.append(node_popped)
+
+        if blossom_node.match is None:
             node_popped = blossom_node.org_nodes.pop(0)
+        else:
+            real_node: Node
+            real_node = None
+            node_neigh: Node = self.graph.nodes.get(blossom_node.match.key)
+            for neigh in node_neigh.edges:
+                node = self.graph.nodes.get(neigh)
+                for c in blossom_node.org_nodes:
+                    if neigh == c.key:
+                        node_neigh.match = node
+                        node.match = node_neigh
+                        real_node = node
+                        break
+            if real_node is None:
+                return
+            node_popped = blossom_node.org_nodes.pop(0)
+            while node_popped.key != real_node.key:
+                blossom_node.org_nodes.append(node_popped)
+                node_popped = blossom_node.org_nodes.pop(0)
         blossom_node.org_nodes.insert(0, node_popped)
         for node_index in range(1, len(blossom_node.org_nodes) - 1):
             if (node_index + 1) % 2 == 0:
@@ -103,11 +109,12 @@ class MaximumMatching:
         for edge in blossom_node.edges.copy():
             self.graph.remove_edge(edge, blossom_node.key)
         self.graph.remove_node(blossom_node.key)
+        self.blossoms.remove(blossom_node)
 
     def findMatching(self):
         augmentingPathFound = True
-        while augmentingPathFound:
-            self.findExposed()
+        self.findExposed()
+        while augmentingPathFound and len(self.exposed) > 1:
             augmentingPathFound = False
             for node in self.exposed:
                 self.resetNodes()
@@ -116,8 +123,11 @@ class MaximumMatching:
                     augmentingPathFound = True
                     alternatePath(path)
                     for blossom in self.blossoms:
+                        if blossom.key==54:
+                            print()
                         self.distract_blossom(blossom)
                     break
+            self.findExposed()
         for blossom in self.blossoms:
             self.distract_blossom(blossom)
 
@@ -125,6 +135,8 @@ class MaximumMatching:
         queue: list[Node] = [src]
         while len(queue) != 0:
             currNode = queue.pop(0)
+            if currNode.key == 30:
+                print()
             currNode.visited = True
             if currNode.parent is None or currNode.parent.match == currNode:
                 for neiId in currNode.edges:
@@ -149,8 +161,8 @@ class MaximumMatching:
                         queue.append(nei)
             else:
                 nei = currNode.match
-                nei.parent = currNode
                 if nei.visited is False:
+                    nei.parent = currNode
                     if nei in self.exposed:
                         return createPath(nei)
                 else:
@@ -175,7 +187,6 @@ class MaximumMatching:
         for node in self.graph.nodes.values():
             node.parent = None
             node.visited = False
-            # self.findExposed()
 
     def find_ancestor(self, node) -> list:
         ancestor_lst = [node]
@@ -196,9 +207,10 @@ class MaximumMatching:
 
 
 if __name__ == '__main__':
-    graph = Graph("../data/A2.json")
+    graph = Graph("../data/A5.json")
     mm = MaximumMatching(graph)
-    # mm.graph.graph_plot()
+    mm.graph.graph_plot()
     mm.findMatching()
     # print()
     mm.graph.graph_plot()
+    print(len(mm.exposed))
