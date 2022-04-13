@@ -38,6 +38,7 @@ class MaximumMatching:
         self.blossoms = []
 
     def constract_blossom(self, blossom_nodes: list) -> Node:
+        self.graph.graph_plot()
         super_node = Node()
         self.graph.add_node(super_node.key, blossom_nodes[0].geolocation)
         super_node = self.graph.nodes.get(super_node.key)
@@ -73,7 +74,6 @@ class MaximumMatching:
                 self.graph.add_edge(node.key, edge)
 
     def distract_blossom(self, blossom_node: Node):
-        # self.graph = copy.deepcopy(self.orgGraph)
         self.graph.graph_plot()
         self.build_edges(blossom_node)
         real_node: Node
@@ -90,7 +90,7 @@ class MaximumMatching:
         if real_node is None:
             return
         node_popped = blossom_node.org_nodes.pop(0)
-        while node_popped != real_node:
+        while node_popped.key != real_node.key:
             blossom_node.org_nodes.append(node_popped)
             node_popped = blossom_node.org_nodes.pop(0)
         blossom_node.org_nodes.insert(0, node_popped)
@@ -100,6 +100,8 @@ class MaximumMatching:
                 node2 = self.graph.nodes.get(blossom_node.org_nodes[node_index + 1].key)
                 node1.match = node2
                 node2.match = node1
+        for edge in blossom_node.edges.copy():
+            self.graph.remove_edge(edge, blossom_node.key)
         self.graph.remove_node(blossom_node.key)
 
     def findMatching(self):
@@ -108,8 +110,6 @@ class MaximumMatching:
             self.findExposed()
             augmentingPathFound = False
             for node in self.exposed:
-                if node.key == 15:
-                    self.graph.graph_plot()
                 self.resetNodes()
                 path = self.findAugmentingPath(node)
                 if len(path) > 0:
@@ -154,7 +154,6 @@ class MaximumMatching:
                     if nei in self.exposed:
                         return createPath(nei)
                 else:
-
                     cycle = self.find_cycles(nei, currNode)
                     if len(cycle) % 2 == 1:
                         blossom = self.constract_blossom(cycle)
@@ -197,8 +196,9 @@ class MaximumMatching:
 
 
 if __name__ == '__main__':
-    graph = Graph("../data/A1.json")
+    graph = Graph("../data/A2.json")
     mm = MaximumMatching(graph)
+    # mm.graph.graph_plot()
     mm.findMatching()
     # print()
     mm.graph.graph_plot()
