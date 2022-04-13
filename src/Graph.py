@@ -137,9 +137,9 @@ class Graph:
             return False
         else:
             # if the node in the graph run over all of the edges that connected to the node and remove them
-            edges = self.nodes[node_id].edges.copy()
-            for node_key in edges:
-                self.remove_edge(node_id, node_key)
+            # edges = self.nodes[node_id].edges.copy()
+            # for node_key in edges:
+            #     self.remove_edge(node_id, node_key)
             # then remove the node
             self.nodes.pop(node_id)
             self._mc += 1
