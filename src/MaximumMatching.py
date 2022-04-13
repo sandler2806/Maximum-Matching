@@ -40,26 +40,31 @@ class MaximumMatching:
 
     def constract_blossom(self, blossom_nodes: list) -> Node:
         # self.cycle = copy.deepcopy(blossom_nodes)
-        blossom: Node = copy.deepcopy(blossom_nodes[0])
-        blossom.clear_node()
-        self.graph.add_node(-1, blossom.geolocation)
-        blossom = self.graph.nodes.get(-1)
+        # blossom: Node = Node(None, blossom_nodes[0].geolocation)
+        # blossom.clear_node()
+        #
+        # blossom = self.graph.nodes.get(blossom.key)
         super_node = Blossom()
+        super_node.geolocation = blossom_nodes[0].geolocation
+        self.graph.add_node(super_node.key, super_node.geolocation)
         for node in blossom_nodes:
             super_node.org_nodes.append(node)
             for edge in node.edges:
                 temp_node: Node = self.orgGraph.nodes.get(edge)
                 if temp_node not in blossom_nodes:
-                    super_node.org_edges.append((node,temp_node))
-                    if temp_node.key not in blossom.edges:
-                        self.graph.add_edge(blossom.key, temp_node.key)
+                    super_node.org_edges.append((node, temp_node))
+                    if temp_node.key not in super_node.edges:
+                        self.graph.add_edge(super_node.key, temp_node.key)
                     if temp_node.parent in blossom_nodes:
                         temp_node.parent = super_node
-                    if node.match == temp_node:
-                        blossom.match = temp_node
+        node_cycle = blossom_nodes[0]
+        while node_cycle in blossom_nodes:
+            node_cycle = node_cycle.parent
+        super_node.parent = node_cycle.parent
+        super_node.match = node_cycle.match
         for node in blossom_nodes:
             self.graph.remove_node(node.key)
-        return blossom
+        return super_node
 
     def build_edges(self, blossom: Blossom):
         for node in blossom.org_nodes:
@@ -101,7 +106,7 @@ class MaximumMatching:
             self.findExposed()
             augmentingPathFound = False
             for node in self.exposed:
-                if node.key==13:
+                if node.key == 13:
                     print()
                 self.resetNodes()
                 path = self.findAugmentingPath(node)
