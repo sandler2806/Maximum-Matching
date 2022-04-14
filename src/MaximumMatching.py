@@ -45,35 +45,36 @@ class MaximumMatching:
         self.exposed = []
         self.blossoms = []
 
-    def constract_blossom(self, blossom_nodes: list) -> Node:
-        super_node = Node()
-        self.graph.add_node(super_node.key, blossom_nodes[0].geolocation)
-        super_node = self.graph.nodes.get(super_node.key)
+    def construct_blossom(self, blossom_nodes: list) -> Node:
+        blossom = Node()
+        self.graph.add_node(blossom.key, blossom_nodes[0].geolocation)
+        blossom = self.graph.nodes.get(blossom.key)
+        blossom.blossom = True
         for node in blossom_nodes:
-            super_node.org_nodes.append(node)
+            blossom.org_nodes.append(node)
             for edge in node.edges:
                 temp_node: Node = self.orgGraph.nodes.get(edge)
                 if temp_node not in blossom_nodes:
-                    super_node.org_edges.append((node, temp_node))
-                    if temp_node.key not in super_node.edges:
-                        self.graph.add_edge(super_node.key, temp_node.key)
+                    blossom.org_edges.append((node, temp_node))
+                    if temp_node.key not in blossom.edges:
+                        self.graph.add_edge(blossom.key, temp_node.key)
                     if temp_node.parent in blossom_nodes:
-                        temp_node.parent = super_node
+                        temp_node.parent = blossom
         node_cycle = blossom_nodes[0]
         while node_cycle.parent in blossom_nodes:
             node_cycle = node_cycle.parent
-        super_node.parent = node_cycle.parent
-        super_node.match = node_cycle.match
-        for node1, node2 in super_node.org_edges:
+        blossom.parent = node_cycle.parent
+        blossom.match = node_cycle.match
+        for node1, node2 in blossom.org_edges:
             self.graph.remove_edge(node1.key, node2.key)
         for node in blossom_nodes:
             self.graph.remove_node(node.key)
-        self.blossoms.insert(0, super_node.key)
-        return super_node
+        self.blossoms.insert(0, blossom.key)
+        return blossom
 
     def build_edges(self, blossom: Node):
         for node in blossom.org_nodes:
-            self.graph.add_node(node.key, node.geolocation)
+            self.graph.add_node(node.key, node.geolocation,node.org_nodes,node.org_edges)
         for node1, node2 in blossom.org_edges:
             self.graph.add_edge(node1.key, node2.key)
         for node in blossom.org_nodes:
@@ -97,8 +98,6 @@ class MaximumMatching:
                         node.match = node_neigh
                         real_node = node
                         break
-            if real_node is None:
-                return
             node_popped = blossom_node.org_nodes.pop(0)
             while node_popped.key != real_node.key:
                 blossom_node.org_nodes.append(node_popped)
@@ -110,8 +109,6 @@ class MaximumMatching:
                 node2 = self.graph.nodes.get(blossom_node.org_nodes[node_index + 1].key)
                 node1.match = node2
                 node2.match = node1
-        if blossom_node.key == 50:
-            print()
         for edge in blossom_node.edges.copy():
             self.graph.remove_edge(edge, blossom_node.key)
         self.graph.remove_node(blossom_node.key)
@@ -120,71 +117,92 @@ class MaximumMatching:
     def findMatching(self):
         augmentingPathFound = True
         self.findExposed()
+        # we check for augmenting path until no such path exist from each exposed node or if only one exposed node left
         while augmentingPathFound and len(self.exposed) > 1:
             augmentingPathFound = False
             for node in self.exposed:
                 self.resetNodes()
                 path = self.findAugmentingPath(node)
+                # if we found an augmenting path we change the match by alternate the path edges
                 if len(path) > 0:
                     augmentingPathFound = True
                     alternatePath(path)
+                    # after finding augmenting path we distract all the blossoms
                     for blossom in self.blossoms.copy():
-                        self.distract_blossom(graph.nodes[blossom])
+                        self.distract_blossom(graph.nodes.get(blossom))
                     break
+            # we update the exposed nodes for the next iteration
             self.findExposed()
         for blossom in self.blossoms.copy():
-            self.distract_blossom(graph.nodes[blossom])
+            self.distract_blossom(graph.nodes.get(blossom))
+
+    """
+    This function get a source exposed node and search for augmenting path from it to another exposed node.
+    """
 
     def findAugmentingPath(self, src: Node) -> list:
         queue: list[Node] = [src]
         while len(queue) != 0:
             currNode = queue.pop(0)
             currNode.visited = True
+            # if the node is the source or a blossom without a parent or that we came from a edge in the matching
+            # so we can go to all the neighbors of the node
             if currNode.parent is None or currNode.parent.match == currNode:
-                for neiId in currNode.edges:
+                for neighborId in currNode.edges:
 
-                    nei = self.graph.nodes.get(neiId)
-                    if currNode.parent == nei:
+                    neighbor = self.graph.nodes.get(neighborId)
+                    # we don't want to go back to the node parent
+                    if currNode.parent == neighbor:
                         continue
-
-                    if nei.visited is True:
-                        cycle = find_cycles(nei, currNode)
+                    # if the neighbor already visited we found a cycle
+                    if neighbor.visited is True:
+                        cycle = find_cycles(neighbor, currNode)
+                        # if the cycle is odd and doesn't contain all the graph we construct a blossom
                         if len(cycle) % 2 == 1 and len(cycle) < graph.v_size():
-                            blossom = self.constract_blossom(cycle)
+                            blossom = self.construct_blossom(cycle)
+                            # we remove from the queue all the nodes that in the blossom
                             for n in cycle:
                                 if n in queue:
                                     queue.remove(n)
                             queue.insert(0, blossom)
                             break
+                    # the neighbor is not visited
                     else:
-                        nei.parent = currNode
-                        if nei in self.exposed:
-                            return createPath(nei)
-                        queue.append(nei)
+                        neighbor.parent = currNode
+                        if neighbor in self.exposed:
+                            return createPath(neighbor)
+                        queue.append(neighbor)
+            # we can go only to the node that in the match with the currNode
             else:
-                nei = currNode.match
-                if nei.visited is False:
-                    nei.parent = currNode
-                    if nei in self.exposed:
-                        return createPath(nei)
+                neighbor = currNode.match
+                if neighbor.visited is False:
+                    neighbor.parent = currNode
+                    if neighbor in self.exposed:
+                        return createPath(neighbor)
+                    queue.append(neighbor)
                 else:
-                    cycle = find_cycles(nei, currNode)
+                    cycle = find_cycles(neighbor, currNode)
                     if len(cycle) % 2 == 1:
-                        blossom = self.constract_blossom(cycle)
+                        blossom = self.construct_blossom(cycle)
                         for n in cycle:
                             if n in queue:
                                 queue.remove(n)
                         queue.insert(0, blossom)
                         break
-                queue.append(nei)
         return []
 
+    """
+    This function find all the exposed nodes and update the list.
+    """
     def findExposed(self):
         self.exposed.clear()
         for node in self.graph.nodes.values():
             if node.match is None:
                 self.exposed.append(node)
 
+    """
+    This function reset all the node for the next iteration.
+    """
     def resetNodes(self):
         for node in self.graph.nodes.values():
             node.parent = None
@@ -194,8 +212,8 @@ class MaximumMatching:
 if __name__ == '__main__':
     graph = Graph("../data/A5.json")
     mm = MaximumMatching(graph)
-    mm.graph.graph_plot()
+    # mm.graph.graph_plot()
     mm.findMatching()
-    # print()
     mm.graph.graph_plot()
+    mm.findExposed()
     print(len(mm.exposed))
