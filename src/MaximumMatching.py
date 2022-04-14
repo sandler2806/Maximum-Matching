@@ -20,6 +20,7 @@ def alternatePath(path: list[Node]):
 
 def find_ancestor(node) -> list:
     ancestor_lst = [node]
+    # iterate over the parents until the parent is null and the last parent that is not null is the ancestor.
     while node.parent is not None:
         node = node.parent
         ancestor_lst.append(node)
@@ -27,13 +28,16 @@ def find_ancestor(node) -> list:
 
 
 def find_cycles(node, node_curr) -> list:
+    # find the path to the ancestor for each node
     ans1 = find_ancestor(node)
     ans2 = find_ancestor(node_curr)
     index_ans1 = len(ans1) - 1
     index_ans2 = len(ans2) - 1
+    # iterate over the paths until the node is different in order to prevent the same node to appear twice in the cycle.
     while ans1[index_ans1] == ans2[index_ans2]:
         index_ans1 -= 1
         index_ans2 -= 1
+    # combine the two different lists to one list and return it.
     return ans1[:index_ans1 + 1] + ans2[index_ans2 + 1::-1]
 
 
@@ -45,76 +49,101 @@ class MaximumMatching:
         self.exposed = []
         self.blossoms = []
 
+    def remove_edges_nodes_blossom(self, blossom, cycle):
+        for node1, node2 in blossom.org_edges:  # iterate over the original edges of the graph with the blossom nodes
+            self.graph.remove_edge(node1.key, node2.key)  # and remove them.
+        for node in cycle:  # remove all the nodes from the graph, because they are contained in the blossom.
+            self.graph.remove_node(node.key)
+
     def constract_blossom(self, blossom_nodes: list) -> Node:
-        super_node = Node()
-        self.graph.add_node(super_node.key, blossom_nodes[0].geolocation)
-        super_node = self.graph.nodes.get(super_node.key)
+        blossom = Node()  # create the blossom node and add it to the graph.
+        self.graph.add_node(blossom.key, blossom_nodes[0].geolocation)
+        blossom = self.graph.nodes.get(blossom.key)
+        blossom.blossom = True
         for node in blossom_nodes:
-            super_node.org_nodes.append(node)
+            blossom.org_nodes.append(node)  # add every node in the cycle to the blossom nodes.
             for edge in node.edges:
                 temp_node: Node = self.orgGraph.nodes.get(edge)
                 if temp_node not in blossom_nodes:
-                    super_node.org_edges.append((node, temp_node))
-                    if temp_node.key not in super_node.edges:
-                        self.graph.add_edge(super_node.key, temp_node.key)
+                    blossom.org_edges.append((node, temp_node))
+                    # find for every node in the blossom his edges in the graph that not in the blossom.
+                    if temp_node.key not in blossom.edges:
+                        self.graph.add_edge(blossom.key, temp_node.key)
+                    # if the parent of the node is now in the blossom nodes,
+                    # then make the blossom his parent instead his original parent.
                     if temp_node.parent in blossom_nodes:
-                        temp_node.parent = super_node
+                        temp_node.parent = blossom
         node_cycle = blossom_nodes[0]
+        # iterate over the cycle node until finding the parent that is not in the cycle.
         while node_cycle.parent in blossom_nodes:
             node_cycle = node_cycle.parent
-        super_node.parent = node_cycle.parent
-        super_node.match = node_cycle.match
-        for node1, node2 in super_node.org_edges:
-            self.graph.remove_edge(node1.key, node2.key)
-        for node in blossom_nodes:
-            self.graph.remove_node(node.key)
-        self.blossoms.insert(0, super_node.key)
-        return super_node
+        # set this node match as the match for the blossom ans the node parent as well.
+        blossom.parent = node_cycle.parent
+        blossom.match = node_cycle.match
+        # remove the edges and nodes that now are inside the blossom.
+        self.remove_edges_nodes_blossom(blossom, blossom_nodes)
+        self.blossoms.insert(0, blossom.key)
+        return blossom
 
     def build_edges(self, blossom: Node):
+        # iterate over the blossom nodes and add them to the graph.
         for node in blossom.org_nodes:
             self.graph.add_node(node.key, node.geolocation)
+        # build the original edges to the graph.
         for node1, node2 in blossom.org_edges:
             self.graph.add_edge(node1.key, node2.key)
+        # add the edges to the new node that has been added.
         for node in blossom.org_nodes:
             for edge in node.edges:
                 self.graph.add_edge(node.key, edge)
 
-    def distract_blossom(self, blossom_node: Node):
-        self.build_edges(blossom_node)
+    def build_edges_new_path(self, blossom):
+        # in order to set the match for non incident edges then i want to add match only when the second node has
+        # odd index in the cycle.
+        for node_index in range(1, len(blossom.org_nodes) - 1):
+            if (node_index + 1) % 2 == 0:
+                node1 = self.graph.nodes.get(blossom.org_nodes[node_index].key)
+                node2 = self.graph.nodes.get(blossom.org_nodes[node_index + 1].key)
+                node1.match = node2
+                node2.match = node1
+        # remove the edges that were connected to the blossom
+        for edge in blossom.edges.copy():
+            self.graph.remove_edge(edge, blossom.key)
 
+    def distract_blossom(self, blossom_node: Node):
+        # build the edges of the nodes that in the blossom.
+        self.build_edges(blossom_node)
+        # check that the blossom has match
         if blossom_node.match is None:
             node_popped = blossom_node.org_nodes.pop(0)
         else:
             real_node: Node
             real_node = None
             node_neigh: Node = self.graph.nodes.get(blossom_node.match.key)
+            # search in the blossom nodes for the node that was connected to the node that has been set has the match
+            # for the blossom and set him as the match for the node that was the blossom match.
             for neigh in node_neigh.edges:
                 node = self.graph.nodes.get(neigh)
-                for c in blossom_node.org_nodes:
-                    if neigh == c.key:
+                for contained_node in blossom_node.org_nodes:
+                    if neigh == contained_node.key:
                         node_neigh.match = node
                         node.match = node_neigh
                         real_node = node
                         break
-            if real_node is None:
+            if real_node is not None:
                 return
             node_popped = blossom_node.org_nodes.pop(0)
+            # pop and append the nodes in the blossom node until the first node is the node that as been set as the
+            # match to the node that was the blossom match.
             while node_popped.key != real_node.key:
                 blossom_node.org_nodes.append(node_popped)
                 node_popped = blossom_node.org_nodes.pop(0)
         blossom_node.org_nodes.insert(0, node_popped)
-        for node_index in range(1, len(blossom_node.org_nodes) - 1):
-            if (node_index + 1) % 2 == 0:
-                node1 = self.graph.nodes.get(blossom_node.org_nodes[node_index].key)
-                node2 = self.graph.nodes.get(blossom_node.org_nodes[node_index + 1].key)
-                node1.match = node2
-                node2.match = node1
-        if blossom_node.key == 50:
-            print()
-        for edge in blossom_node.edges.copy():
-            self.graph.remove_edge(edge, blossom_node.key)
+        # correctly switch the matching and add edges.
+        self.build_edges_new_path(blossom_node)
+        # remove the blossom node from the graph.
         self.graph.remove_node(blossom_node.key)
+        # remove the blossom node from the blossom list.
         self.blossoms.remove(blossom_node.key)
 
     def findMatching(self):
