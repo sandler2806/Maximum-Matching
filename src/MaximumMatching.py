@@ -38,7 +38,6 @@ class MaximumMatching:
         self.blossoms = []
 
     def constract_blossom(self, blossom_nodes: list) -> Node:
-        # self.graph.graph_plot()
         super_node = Node()
         self.graph.add_node(super_node.key, blossom_nodes[0].geolocation)
         super_node = self.graph.nodes.get(super_node.key)
@@ -61,22 +60,21 @@ class MaximumMatching:
             self.graph.remove_edge(node1.key, node2.key)
         for node in blossom_nodes:
             self.graph.remove_node(node.key)
-        self.blossoms.append(super_node)
+        self.blossoms.insert(0,super_node)
         return super_node
 
     def build_edges(self, blossom: Node):
         for node in blossom.org_nodes:
             self.graph.add_node(node.key, node.geolocation)
         for node1, node2 in blossom.org_edges:
-            if node2.key not in self.graph.nodes:
-                print()
+            if node2.key not in graph.nodes:
+                graph.graph_plot()
             self.graph.add_edge(node1.key, node2.key)
         for node in blossom.org_nodes:
             for edge in node.edges:
                 self.graph.add_edge(node.key, edge)
 
     def distract_blossom(self, blossom_node: Node):
-        # self.graph.graph_plot()
         self.build_edges(blossom_node)
 
         if blossom_node.match is None:
@@ -106,6 +104,8 @@ class MaximumMatching:
                 node2 = self.graph.nodes.get(blossom_node.org_nodes[node_index + 1].key)
                 node1.match = node2
                 node2.match = node1
+        if blossom_node.key==50:
+            print()
         for edge in blossom_node.edges.copy():
             self.graph.remove_edge(edge, blossom_node.key)
         self.graph.remove_node(blossom_node.key)
@@ -122,13 +122,13 @@ class MaximumMatching:
                 if len(path) > 0:
                     augmentingPathFound = True
                     alternatePath(path)
-                    for blossom in self.blossoms:
+                    for blossom in self.blossoms.copy():
                         if blossom.key==54:
                             print()
                         self.distract_blossom(blossom)
                     break
             self.findExposed()
-        for blossom in self.blossoms:
+        for blossom in self.blossoms.copy():
             self.distract_blossom(blossom)
 
     def findAugmentingPath(self, src: Node) -> list:
@@ -152,7 +152,7 @@ class MaximumMatching:
                             for n in cycle:
                                 if n in queue:
                                     queue.remove(n)
-                            queue.append(blossom)
+                            queue.insert(0, blossom)
                             break
                     else:
                         nei.parent = currNode
@@ -172,7 +172,7 @@ class MaximumMatching:
                         for n in cycle:
                             if n in queue:
                                 queue.remove(n)
-                        queue.append(blossom)
+                        queue.insert(0,blossom)
                         break
                 queue.append(nei)
         return []
