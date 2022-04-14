@@ -1,8 +1,5 @@
-from queue import Queue
-from typing import List
 from Graph import Graph
 from Node import Node
-import copy
 
 
 def createPath(node: Node) -> list:
@@ -21,12 +18,23 @@ def alternatePath(path: list[Node]):
         path[i + 1].match = node
 
 
-# class Blossom(Node):
-#
-#     def __init__(self):
-#         Node.__init__(self)
-#         self.org_nodes = []
-#         self.org_edges = []
+def find_ancestor(node) -> list:
+    ancestor_lst = [node]
+    while node.parent is not None:
+        node = node.parent
+        ancestor_lst.append(node)
+    return ancestor_lst
+
+
+def find_cycles(node, node_curr) -> list:
+    ans1 = find_ancestor(node)
+    ans2 = find_ancestor(node_curr)
+    index_ans1 = len(ans1) - 1
+    index_ans2 = len(ans2) - 1
+    while ans1[index_ans1] == ans2[index_ans2]:
+        index_ans1 -= 1
+        index_ans2 -= 1
+    return ans1[:index_ans1 + 1] + ans2[index_ans2 + 1::-1]
 
 
 class MaximumMatching:
@@ -60,15 +68,13 @@ class MaximumMatching:
             self.graph.remove_edge(node1.key, node2.key)
         for node in blossom_nodes:
             self.graph.remove_node(node.key)
-        self.blossoms.insert(0,super_node)
+        self.blossoms.insert(0, super_node.key)
         return super_node
 
     def build_edges(self, blossom: Node):
         for node in blossom.org_nodes:
             self.graph.add_node(node.key, node.geolocation)
         for node1, node2 in blossom.org_edges:
-            if node2.key not in graph.nodes:
-                graph.graph_plot()
             self.graph.add_edge(node1.key, node2.key)
         for node in blossom.org_nodes:
             for edge in node.edges:
@@ -104,12 +110,12 @@ class MaximumMatching:
                 node2 = self.graph.nodes.get(blossom_node.org_nodes[node_index + 1].key)
                 node1.match = node2
                 node2.match = node1
-        if blossom_node.key==50:
+        if blossom_node.key == 50:
             print()
         for edge in blossom_node.edges.copy():
             self.graph.remove_edge(edge, blossom_node.key)
         self.graph.remove_node(blossom_node.key)
-        self.blossoms.remove(blossom_node)
+        self.blossoms.remove(blossom_node.key)
 
     def findMatching(self):
         augmentingPathFound = True
@@ -123,20 +129,16 @@ class MaximumMatching:
                     augmentingPathFound = True
                     alternatePath(path)
                     for blossom in self.blossoms.copy():
-                        if blossom.key==54:
-                            print()
-                        self.distract_blossom(blossom)
+                        self.distract_blossom(graph.nodes[blossom])
                     break
             self.findExposed()
         for blossom in self.blossoms.copy():
-            self.distract_blossom(blossom)
+            self.distract_blossom(graph.nodes[blossom])
 
     def findAugmentingPath(self, src: Node) -> list:
         queue: list[Node] = [src]
         while len(queue) != 0:
             currNode = queue.pop(0)
-            if currNode.key == 30:
-                print()
             currNode.visited = True
             if currNode.parent is None or currNode.parent.match == currNode:
                 for neiId in currNode.edges:
@@ -146,7 +148,7 @@ class MaximumMatching:
                         continue
 
                     if nei.visited is True:
-                        cycle = self.find_cycles(nei, currNode)
+                        cycle = find_cycles(nei, currNode)
                         if len(cycle) % 2 == 1 and len(cycle) < graph.v_size():
                             blossom = self.constract_blossom(cycle)
                             for n in cycle:
@@ -166,13 +168,13 @@ class MaximumMatching:
                     if nei in self.exposed:
                         return createPath(nei)
                 else:
-                    cycle = self.find_cycles(nei, currNode)
+                    cycle = find_cycles(nei, currNode)
                     if len(cycle) % 2 == 1:
                         blossom = self.constract_blossom(cycle)
                         for n in cycle:
                             if n in queue:
                                 queue.remove(n)
-                        queue.insert(0,blossom)
+                        queue.insert(0, blossom)
                         break
                 queue.append(nei)
         return []
@@ -187,23 +189,6 @@ class MaximumMatching:
         for node in self.graph.nodes.values():
             node.parent = None
             node.visited = False
-
-    def find_ancestor(self, node) -> list:
-        ancestor_lst = [node]
-        while node.parent is not None:
-            node = node.parent
-            ancestor_lst.append(node)
-        return ancestor_lst
-
-    def find_cycles(self, node, node_curr) -> list:
-        ans1 = self.find_ancestor(node)
-        ans2 = self.find_ancestor(node_curr)
-        index_ans1 = len(ans1) - 1
-        index_ans2 = len(ans2) - 1
-        while ans1[index_ans1] == ans2[index_ans2]:
-            index_ans1 -= 1
-            index_ans2 -= 1
-        return ans1[:index_ans1 + 1] + ans2[index_ans2 + 1::-1]
 
 
 if __name__ == '__main__':
