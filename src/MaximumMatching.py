@@ -87,7 +87,7 @@ class MaximumMatching:
         self.remove_edges_nodes_blossom(blossom, blossom_nodes)
         self.blossoms.insert(0, blossom.key)
         # self.graph.graph_plot()
-        if blossom.key==48:
+        if blossom.key == 48:
             print()
         return blossom
 
@@ -249,6 +249,20 @@ class MaximumMatching:
             node.parent = None
             node.visited = False
 
+
+def MinimumLineCover():
+    g = Graph("../data/A4.json")
+    mlc_match = MaximumMatching(g)
+    mlc_edges = []
+    for node in mlc_match.graph.nodes.values():
+        if node.match is None:
+            mlc_edges.append((node.key, node.edges[0]))
+        else:
+            temp_tuple = (node.key, node.match.key)
+            reverse_temp_tuple = (node.match.key, node.key)
+            if temp_tuple not in mlc_edges and reverse_temp_tuple not in mlc_edges:
+                mlc_edges.append(temp_tuple)
+    return mlc_edges
 
 if __name__ == '__main__':
     graph = Graph("../data/A4.json")
