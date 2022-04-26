@@ -34,20 +34,22 @@ class GUI:
 
 
     @staticmethod
-    def draw(graph):
+    def draw(graph,exposed):
+        mouse = pygame.mouse.get_pos()
         scr = GUI.screen
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
 
                 # if the mouse is clicked on the
                 # button the game is terminated
-                if 10 <= mouse[0] <= 10 + 10 and 10 <= mouse[1] <= 720 + 10:
-                    pygame.quit()
-                    return 0
-                    # sys.exit()
+                if 20 <= mouse[0] <= 20 + 20 and 20 <= mouse[1] <= 720 + 20:
+                    sys.exit()
 
         scr.fill((255, 255, 255))
-        pygame.draw.rect(scr, (227, 244, 91), [10, 10, 10, 10])
+        pygame.draw.rect(scr, (183, 0, 0), [20, 20, 20, 20])
+        smallfont = pygame.font.SysFont('Corbel', 17, bold=True)
+        scr.blit(smallfont.render('exposed:', True, (0, 0, 0)), (50, 20))
+        scr.blit(smallfont.render(str(exposed), True, (0, 0, 0)), (120, 20))
         GUI.set_location(graph)
         scaling = GUI.caclulate_minmax(graph)
         min_x = scaling[0][0]
@@ -64,7 +66,7 @@ class GUI:
                 x2 = ( graph.nodes[edge].geolocation[0] - min_x) * (lon) + 60
                 y2 = ( graph.nodes[edge].geolocation[1] - min_y) * (lat) + 60
                 if  graph.nodes.get(node).match ==  graph.nodes.get(edge):
-                    pygame.draw.line(scr, color, (x1, y1), (x2, y2), 2)
+                    pygame.draw.line(scr, color, (x1, y1), (x2, y2), 4)
                 else:
                     pygame.draw.line(scr, (0, 0, 0), (x1, y1), (x2, y2), 2)
 

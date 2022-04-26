@@ -88,6 +88,8 @@ class MaximumMatching:
         # remove the edges and nodes that now are inside the blossom.
         self.remove_edges_nodes_blossom(blossom, blossom_nodes)
         self.blossoms.insert(0, blossom.key)
+        GUI.draw(mm.graph,len(mm.exposed))
+        t.sleep(1)
         return blossom
 
     def build_edges(self, blossom: Node):
@@ -148,6 +150,8 @@ class MaximumMatching:
         self.graph.remove_node(blossom_node.key)
         # remove the blossom node from the blossom list.
         self.blossoms.remove(blossom_node.key)
+        GUI.draw(mm.graph,len(mm.exposed))
+        t.sleep(1)
 
     def findMatching(self):
         augmentingPathFound = True
@@ -168,8 +172,7 @@ class MaximumMatching:
                     break
             # we update the exposed nodes for the next iteration
             self.findExposed()
-            if GUI.draw(self.graph)==0:
-                break
+            GUI.draw(mm.graph, len(mm.exposed))
             t.sleep(1)
         for blossom in self.blossoms.copy():
             self.distract_blossom(graph.nodes.get(blossom))
@@ -253,10 +256,13 @@ class MaximumMatching:
 
 
 if __name__ == '__main__':
-    graph = Graph("../data/A3.json")
+    graph = Graph("../data/A5.json")
     mm = MaximumMatching(graph)
     GUI.init_GUI()
     mm.findMatching()
     mm.findExposed()
-    mm.graph.graph_plot()
+    # mm.graph.graph_plot()
     print(len(mm.exposed))
+    while True:
+        GUI.draw(mm.graph,len(mm.exposed))
+        t.sleep(1)
