@@ -11,7 +11,8 @@ class Node:
         Node.max_key += 1
         self.geolocation = geolocation
         self.tag = 0
-        self.edges = []
+        self.edges ={3}
+        self.edges.clear()
         self.parent: Node
         self.parent = None
         self.match: Node

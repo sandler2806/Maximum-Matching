@@ -1,5 +1,8 @@
+import time as t
+
 from Graph import Graph
 from Node import Node
+from GUI import *
 
 
 def createPath(node: Node) -> list:
@@ -55,7 +58,6 @@ class MaximumMatching:
             self.graph.remove_node(node.key)
 
     def construct_blossom(self, blossom_nodes: list) -> Node:
-        # self.graph.graph_plot()
         blossom = Node()
         # create the blossom node and add it to the graph.
         self.graph.add_node(blossom.key, blossom_nodes[0].geolocation)
@@ -86,9 +88,6 @@ class MaximumMatching:
         # remove the edges and nodes that now are inside the blossom.
         self.remove_edges_nodes_blossom(blossom, blossom_nodes)
         self.blossoms.insert(0, blossom.key)
-        # self.graph.graph_plot()
-        if blossom.key == 48:
-            print()
         return blossom
 
     def build_edges(self, blossom: Node):
@@ -169,6 +168,9 @@ class MaximumMatching:
                     break
             # we update the exposed nodes for the next iteration
             self.findExposed()
+            if GUI.draw(self.graph)==0:
+                break
+            t.sleep(1)
         for blossom in self.blossoms.copy():
             self.distract_blossom(graph.nodes.get(blossom))
 
@@ -265,10 +267,10 @@ def MinimumLineCover():
     return mlc_edges
 
 if __name__ == '__main__':
-    graph = Graph("../data/A4.json")
+    graph = Graph("../data/A3.json")
     mm = MaximumMatching(graph)
-    # mm.graph.graph_plot()
+    GUI.init_GUI()
     mm.findMatching()
-    mm.graph.graph_plot()
     mm.findExposed()
+    mm.graph.graph_plot()
     print(len(mm.exposed))

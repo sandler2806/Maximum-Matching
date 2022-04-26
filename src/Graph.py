@@ -96,8 +96,8 @@ class Graph:
             return False
         else:
             # add the edge to the nodes
-            node_src.edges.append(id2)
-            node_dst.edges.append(id1)
+            node_src.edges.add(id2)
+            node_dst.edges.add(id1)
             self._mc += 1
             self._numOfEdges += 1
             return True
