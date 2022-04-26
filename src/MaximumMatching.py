@@ -44,7 +44,6 @@ def find_cycles(node, node_curr) -> list:
 class MaximumMatching:
 
     def __init__(self, graph: Graph):
-        self.orgGraph = graph
         self.graph = graph
         self.exposed = []
         self.blossoms = []
@@ -57,14 +56,15 @@ class MaximumMatching:
 
     def construct_blossom(self, blossom_nodes: list) -> Node:
         # self.graph.graph_plot()
-        blossom = Node()  # create the blossom node and add it to the graph.
+        blossom = Node()
+        # create the blossom node and add it to the graph.
         self.graph.add_node(blossom.key, blossom_nodes[0].geolocation)
         blossom = self.graph.nodes.get(blossom.key)
         blossom.blossom = True
         for node in blossom_nodes:
             blossom.org_nodes.append(node)  # add every node in the cycle to the blossom nodes.
             for edge in node.edges:
-                temp_node: Node = self.orgGraph.nodes.get(edge)
+                temp_node: Node = self.graph.nodes.get(edge)
                 if temp_node not in blossom_nodes:
                     blossom.org_edges.append((node, temp_node))
                     # find for every node in the blossom his edges in the graph that not in the blossom.
@@ -82,18 +82,17 @@ class MaximumMatching:
         blossom.parent = node_cycle.parent
         blossom.match = node_cycle.match
         if blossom.match is not None:
-            node_cycle.match.match=blossom
-
+            node_cycle.match.match = blossom
         # remove the edges and nodes that now are inside the blossom.
         self.remove_edges_nodes_blossom(blossom, blossom_nodes)
         self.blossoms.insert(0, blossom.key)
-        # self.graph.graph_plot()
+        self.graph.graph_plot()
         return blossom
 
     def build_edges(self, blossom: Node):
         # iterate over the blossom nodes and add them to the graph.
         for node in blossom.org_nodes:
-            self.graph.add_node(node.key, node.geolocation,node.org_nodes,node.org_edges)
+            self.graph.add_node(node.key, node.geolocation, node.org_nodes, node.org_edges)
         # build the original edges to the graph.
         for node1, node2 in blossom.org_edges:
             self.graph.add_edge(node1.key, node2.key)
@@ -229,6 +228,7 @@ class MaximumMatching:
     """
     This function find all the exposed nodes and update the list.
     """
+
     def findExposed(self):
         self.exposed.clear()
         for node in self.graph.nodes.values():
@@ -238,6 +238,7 @@ class MaximumMatching:
     """
     This function reset all the node for the next iteration.
     """
+
     def resetNodes(self):
         for node in self.graph.nodes.values():
             node.parent = None
