@@ -11,7 +11,6 @@ from types import SimpleNamespace
 import MaximumMatching as mm
 
 
-
 class GUI:
     min_x: float
     min_y: float
@@ -20,8 +19,6 @@ class GUI:
     screen = display.set_mode((1080, 720), depth=32, flags=RESIZABLE)
     radius = 15
     FONT: font
-
-
 
     @staticmethod
     def init_GUI():
@@ -32,9 +29,8 @@ class GUI:
 
         GUI.screen = display.set_mode((WIDTH, HEIGHT), depth=32, flags=RESIZABLE)
 
-
     @staticmethod
-    def draw(graph,exposed):
+    def draw(graph, exposed, line=False):
         mouse = pygame.mouse.get_pos()
         scr = GUI.screen
         for event in pygame.event.get():
@@ -59,26 +55,29 @@ class GUI:
         color = (200, 30, 70)
         font = pygame.font.SysFont('Times ', 12)
         # iterate over the edges first and draw them
-        for node in  graph.nodes:
-            for edge in  graph.all_edges_of_node(node):
-                x1 = ( graph.nodes[node].geolocation[0] - min_x) * (lon) + 60
-                y1 = ( graph.nodes[node].geolocation[1] - min_y) * (lat) + 60
-                x2 = ( graph.nodes[edge].geolocation[0] - min_x) * (lon) + 60
-                y2 = ( graph.nodes[edge].geolocation[1] - min_y) * (lat) + 60
-                if  graph.nodes.get(node).match ==  graph.nodes.get(edge):
+        for node in graph.nodes:
+            color = (200, 30, 70)
+            for edge in graph.all_edges_of_node(node):
+                x1 = (graph.nodes[node].geolocation[0] - min_x) * (lon) + 60
+                y1 = (graph.nodes[node].geolocation[1] - min_y) * (lat) + 60
+                x2 = (graph.nodes[edge].geolocation[0] - min_x) * (lon) + 60
+                y2 = (graph.nodes[edge].geolocation[1] - min_y) * (lat) + 60
+                if graph.nodes.get(node).match == graph.nodes.get(edge):
                     pygame.draw.line(scr, color, (x1, y1), (x2, y2), 4)
                 else:
                     pygame.draw.line(scr, (0, 0, 0), (x1, y1), (x2, y2), 2)
+            if graph.nodes[node].match is None and line is True:
+                color = (123, 200, 50)
+                pygame.draw.line(scr, color, (x1, y1), (x2, y2), 4)
 
-        for node in  graph.nodes:
-            x = ( graph.nodes[node].geolocation[0] - min_x) * (lon) + 60
-            y = ( graph.nodes[node].geolocation[1] - min_y) * (lat) + 60
+        for node in graph.nodes:
+            x = (graph.nodes[node].geolocation[0] - min_x) * (lon) + 60
+            y = (graph.nodes[node].geolocation[1] - min_y) * (lat) + 60
             pygame.draw.circle(scr, (0, 0, 0), (x, y), 4)
             txt = font.render(str(node), 1, (0, 150, 255))
             scr.blit(txt, (x - 8, y - 19))
 
         # pygame.display.flip()
-
 
         display.update()
 
@@ -89,18 +88,18 @@ class GUI:
         miny = sys.maxsize
         max_x = (0 - sys.maxsize)
         maxy = (0 - sys.maxsize)
-        node_iter =  graph.get_all_v()
+        node_iter = graph.get_all_v()
         # run over all the nodes and check for location values to get the min, max y and x
         for node in node_iter:
-            if  graph.nodes[node].geolocation != (0, 0, 0):
-                if  graph.nodes[node].geolocation[0] < minx:
-                    minx =  graph.nodes[node].geolocation[0]
-                if  graph.nodes[node].geolocation[0] > max_x:
-                    max_x =  graph.nodes[node].geolocation[0]
-                if  graph.nodes[node].geolocation[1] < miny:
-                    miny =  graph.nodes[node].geolocation[1]
-                if  graph.nodes[node].geolocation[1] > maxy:
-                    maxy =  graph.nodes[node].geolocation[1]
+            if graph.nodes[node].geolocation != (0, 0, 0):
+                if graph.nodes[node].geolocation[0] < minx:
+                    minx = graph.nodes[node].geolocation[0]
+                if graph.nodes[node].geolocation[0] > max_x:
+                    max_x = graph.nodes[node].geolocation[0]
+                if graph.nodes[node].geolocation[1] < miny:
+                    miny = graph.nodes[node].geolocation[1]
+                if graph.nodes[node].geolocation[1] > maxy:
+                    maxy = graph.nodes[node].geolocation[1]
         # check if there is node with position
         if minx != sys.maxsize and miny != sys.maxsize and max_x != (0 - sys.maxsize) and maxy != (0 - sys.maxsize):
             abs_x = abs(minx - max_x)
@@ -114,7 +113,7 @@ class GUI:
     @staticmethod
     def set_location(graph):
         dict_min_max = GUI.caclulate_minmax(graph)[0]
-        for i in  graph.nodes.values():
+        for i in graph.nodes.values():
             if i.geolocation == (0, 0, 0):
                 # check if the given min and max values are correct
                 if (dict_min_max[0] != sys.maxsize and dict_min_max[1] != sys.maxsize

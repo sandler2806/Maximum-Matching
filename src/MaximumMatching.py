@@ -270,7 +270,7 @@ def MinimumLineCover():
     return mlc_edges
 
 if __name__ == '__main__':
-    graph = Graph("../data/A5.json")
+    graph = Graph("../data/A1.json")
     mm = MaximumMatching(graph)
     GUI.init_GUI()
     mm.findMatching()
@@ -278,5 +278,5 @@ if __name__ == '__main__':
     # mm.graph.graph_plot()
     print(len(mm.exposed))
     while True:
-        GUI.draw(mm.graph,len(mm.exposed))
+        GUI.draw(mm.graph,len(mm.exposed),True)
         t.sleep(1)
