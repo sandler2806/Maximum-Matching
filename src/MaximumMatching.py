@@ -246,7 +246,7 @@ class MaximumMatching:
 if __name__ == '__main__':
     graph = Graph("../data/A5.json")
     mm = MaximumMatching(graph)
-    mm.graph.graph_plot()
+    # mm.graph.graph_plot()
     mm.findMatching()
     mm.graph.graph_plot()
     mm.findExposed()

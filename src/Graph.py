@@ -92,7 +92,7 @@ class Graph:
         node_src = self.nodes.get(id1)
         node_dst = self.nodes.get(id2)
         # if there is no node with one of the given id's or the edge is missing then return false
-        if (node_src or node_dst or node_src.outEdges[id2]) is None:
+        if (node_src or node_dst or node_src.edges[id2]) is None:
             return False
         else:
             # add the edge to the nodes
