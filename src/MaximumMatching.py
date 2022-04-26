@@ -55,7 +55,6 @@ class MaximumMatching:
             self.graph.remove_node(node.key)
 
     def construct_blossom(self, blossom_nodes: list) -> Node:
-        # self.graph.graph_plot()
         blossom = Node()
         # create the blossom node and add it to the graph.
         self.graph.add_node(blossom.key, blossom_nodes[0].geolocation)
@@ -86,9 +85,6 @@ class MaximumMatching:
         # remove the edges and nodes that now are inside the blossom.
         self.remove_edges_nodes_blossom(blossom, blossom_nodes)
         self.blossoms.insert(0, blossom.key)
-        # self.graph.graph_plot()
-        if blossom.key==48:
-            print()
         return blossom
 
     def build_edges(self, blossom: Node):
@@ -251,10 +247,8 @@ class MaximumMatching:
 
 
 if __name__ == '__main__':
-    graph = Graph("../data/A4.json")
+    graph = Graph("../data/A1.json")
     mm = MaximumMatching(graph)
-    # mm.graph.graph_plot()
     mm.findMatching()
-    mm.graph.graph_plot()
     mm.findExposed()
     print(len(mm.exposed))
