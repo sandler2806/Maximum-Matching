@@ -87,6 +87,8 @@ class MaximumMatching:
         self.remove_edges_nodes_blossom(blossom, blossom_nodes)
         self.blossoms.insert(0, blossom.key)
         # self.graph.graph_plot()
+        if blossom.key==48:
+            print()
         return blossom
 
     def build_edges(self, blossom: Node):
@@ -186,7 +188,7 @@ class MaximumMatching:
 
                     neighbor = self.graph.nodes.get(neighborId)
                     # we don't want to go back to the node parent
-                    if currNode.parent == neighbor:
+                    if currNode.parent == neighbor or neighbor in queue:
                         continue
                     # if the neighbor already visited we found a cycle
                     if neighbor.visited is True:
@@ -199,6 +201,8 @@ class MaximumMatching:
                                 if n in queue:
                                     queue.remove(n)
                             queue.insert(0, blossom)
+                            if blossom.match is None and blossom.parent is not None:
+                                return createPath(blossom)
                             break
                     # the neighbor is not visited
                     else:
@@ -207,7 +211,7 @@ class MaximumMatching:
                             return createPath(neighbor)
                         queue.append(neighbor)
             # we can go only to the node that in the match with the currNode
-            else:
+            elif currNode.match not in queue:
                 neighbor = currNode.match
                 if neighbor.visited is False:
                     neighbor.parent = currNode
@@ -222,12 +226,14 @@ class MaximumMatching:
                             if n in queue:
                                 queue.remove(n)
                         queue.insert(0, blossom)
-                        break
+                        if blossom.match is None and blossom.parent is not None:
+                            return createPath(blossom)
         return []
 
     """
     This function find all the exposed nodes and update the list.
     """
+
     def findExposed(self):
         self.exposed.clear()
         for node in self.graph.nodes.values():
@@ -237,6 +243,7 @@ class MaximumMatching:
     """
     This function reset all the node for the next iteration.
     """
+
     def resetNodes(self):
         for node in self.graph.nodes.values():
             node.parent = None
@@ -244,7 +251,7 @@ class MaximumMatching:
 
 
 if __name__ == '__main__':
-    graph = Graph("../data/A5.json")
+    graph = Graph("../data/A4.json")
     mm = MaximumMatching(graph)
     # mm.graph.graph_plot()
     mm.findMatching()
