@@ -112,10 +112,10 @@ class Graph:
     """
 
     def add_node(self, node_id: int, pos: tuple = (0, 0, 0), org_nodes=None, org_edges=None) -> bool:
-        if org_nodes is None:
-            org_nodes = []
         if org_edges is None:
             org_edges = []
+        if org_nodes is None:
+            org_nodes = []
         node_src = self.nodes.get(node_id)
         # check that the node is not in the graph
         if node_src is not None:

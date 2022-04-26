@@ -86,7 +86,7 @@ class MaximumMatching:
         # remove the edges and nodes that now are inside the blossom.
         self.remove_edges_nodes_blossom(blossom, blossom_nodes)
         self.blossoms.insert(0, blossom.key)
-        self.graph.graph_plot()
+        # self.graph.graph_plot()
         return blossom
 
     def build_edges(self, blossom: Node):
@@ -228,17 +228,15 @@ class MaximumMatching:
     """
     This function find all the exposed nodes and update the list.
     """
-
     def findExposed(self):
         self.exposed.clear()
         for node in self.graph.nodes.values():
-            if node.match is None:
+            if node.match is None or node != node.match.match:
                 self.exposed.append(node)
 
     """
     This function reset all the node for the next iteration.
     """
-
     def resetNodes(self):
         for node in self.graph.nodes.values():
             node.parent = None
