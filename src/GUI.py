@@ -73,7 +73,10 @@ class GUI:
         for node in graph.nodes:
             x = (graph.nodes[node].geolocation[0] - min_x) * (lon) + 60
             y = (graph.nodes[node].geolocation[1] - min_y) * (lat) + 60
-            pygame.draw.circle(scr, (0, 0, 0), (x, y), 4)
+            if graph.nodes.get(node).blossom:
+                pygame.draw.circle(scr, (184, 35, 216), (x, y), 4)
+            else:
+                pygame.draw.circle(scr, (0, 0, 0), (x, y), 4)
             txt = font.render(str(node), 1, (0, 150, 255))
             scr.blit(txt, (x - 8, y - 19))
 

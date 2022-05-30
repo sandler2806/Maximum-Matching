@@ -111,9 +111,9 @@ class Graph:
     Note: If the edge already exists or one of the nodes dose not exists the functions will do nothing
     """
 
-    def add_node(self, node_id: int, pos: tuple = (0, 0, 0), org_nodes=None, org_edges=None) -> bool:
-        if org_edges is None:
-            org_edges = []
+    def add_node(self, node_id: int, pos: tuple = (0, 0, 0), org_nodes=None, outer_edges=None) -> bool:
+        if outer_edges is None:
+            outer_edges = []
         if org_nodes is None:
             org_nodes = []
         node_src = self.nodes.get(node_id)
@@ -122,7 +122,7 @@ class Graph:
             return False
         else:
             # if the node not in the graph then add it
-            node_src = Node(node_id, pos,org_nodes,org_edges)
+            node_src = Node(node_id, pos,org_nodes,outer_edges)
             self.nodes[node_id] = node_src
             self._mc += 1
             return True

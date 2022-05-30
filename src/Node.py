@@ -1,7 +1,7 @@
 class Node:
     max_key = 0
 
-    def __init__(self, key: int = None, geolocation: tuple = (0, 0, 0),org_nodes=[],org_edges=[]):
+    def __init__(self, key: int = None, geolocation: tuple = (0, 0, 0),org_nodes=[],outer_edges=[]):
         if key is not None:
             if Node.max_key < key:
                 Node.max_key = key
@@ -19,7 +19,7 @@ class Node:
         self.match = None
         self.visited = False
         self.org_nodes = org_nodes
-        self.org_edges = org_edges
+        self.outer_edges = outer_edges
         self.blossom=False
 
     # add edge
